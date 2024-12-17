@@ -4,7 +4,7 @@ from textnode import TextNode, TextType
 
 
 class TestTextNode(unittest.TestCase):
-    def test_eq(self):
+    def test_repr(self):
         node = TextNode("This is a text node", TextType.BOLD)
         node2 = TextNode("This is a text node", TextType.BOLD)
         self.assertEqual(node, node2)
@@ -20,6 +20,11 @@ class TestTextNode(unittest.TestCase):
         self.assertNotEqual(node4, node5)
         self.assertNotEqual(node2, node3)
         self.assertNotEqual(node2, node5)
+        
+        self.assertEqual(
+            node.__repr__(),
+            "TextNode(This is a text node, bold, None)"
+        )
 
 if __name__ == "__main__":
     unittest.main()
