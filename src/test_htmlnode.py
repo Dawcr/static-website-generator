@@ -168,7 +168,7 @@ class TestHTMLNode(unittest.TestCase):
                     )
                 ],
             )
-            node4.to_html()
+            node4.to_html() 
             
     # boot.dev tests
     def test_to_html_with_children(self):
@@ -214,6 +214,7 @@ class TestHTMLNode(unittest.TestCase):
             node.to_html(),
             "<h2><b>Bold text</b>Normal text<i>italic text</i>Normal text</h2>",
         )
+        
         
 if __name__ == "__main__":
     unittest.main()
