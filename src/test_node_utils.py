@@ -8,6 +8,7 @@ from node_utils import (
     split_nodes_image, 
     split_nodes_link, 
     split_nodes_imagelink,
+    text_to_textnodes,
 )
 
 from textnode import TextType, TextNode
@@ -219,6 +220,19 @@ class TestSplitNodeDelimiter(unittest.TestCase):
             ],
             new_nodes,
         )
+        
+    def test_delim_bold_and_italic(self):
+        node = TextNode("**bold** and *italic*", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
+        new_nodes = split_nodes_delimiter(new_nodes, "*", TextType.ITALIC)
+        self.assertEqual(
+            [
+                TextNode("bold", TextType.BOLD),
+                TextNode(" and ", TextType.TEXT),
+                TextNode("italic", TextType.ITALIC),
+            ],
+        new_nodes,
+    )
 
 
 class TestExtractMarkdownImages(unittest.TestCase):
@@ -421,6 +435,26 @@ class TestSplitNodesImageLink(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "split_nodes_imagelink only works with images and links"):
             split_nodes_imagelink([],TextType.TEXT)
     # the other cases are covered by TestSplitNodesImage and TestSplitNodesLink classes
+
+
+class TestTextToTextnodes(unittest.TestCase):
+    def test_example(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        self.assertListEqual(
+            [
+                TextNode("This is ", TextType.TEXT),
+                TextNode("text", TextType.BOLD),
+                TextNode(" with an ", TextType.TEXT),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" word and a ", TextType.TEXT),
+                TextNode("code block", TextType.CODE),
+                TextNode(" and an ", TextType.TEXT),
+                TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+                TextNode(" and a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "https://boot.dev"),
+            ],
+            text_to_textnodes(text),
+        )
 
 
 if __name__ == "__main__":
