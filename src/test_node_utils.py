@@ -236,7 +236,7 @@ class TestSplitNodeDelimiter(unittest.TestCase):
 
 
 class TestExtractMarkdownImages(unittest.TestCase):
-    def test_simple_extraction(self):
+    def test_example(self):
         text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
         self.assertListEqual(
             [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")],
@@ -281,7 +281,7 @@ class TestExtractMarkdownLinks(unittest.TestCase):
 
 
 class TestSplitNodesImage(unittest.TestCase):
-    def test_simple_split(self):
+    def test_example(self):
         node = TextNode(
             "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)",
             TextType.TEXT,
@@ -362,7 +362,7 @@ class TestSplitNodesImage(unittest.TestCase):
 
 
 class TestSplitNodesLink(unittest.TestCase):
-    def test_simple_split(self):
+    def test_example(self):
         node = TextNode(
             "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
             TextType.TEXT,
