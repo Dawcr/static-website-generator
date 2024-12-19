@@ -2,6 +2,7 @@ import unittest
 
 from htmlnode import HTMLNode, LeafNode, ParentNode
 
+
 class TestHTMLNode(unittest.TestCase):
     def test_props_to_html(self):
         node = HTMLNode(tag="link", props={"rel":"stylesheet", "href":"styles.css"})

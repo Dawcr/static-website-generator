@@ -1,6 +1,5 @@
 from enum import Enum
 
-from htmlnode import LeafNode
 
 class TextType(Enum):
     TEXT = "text"
@@ -10,9 +9,7 @@ class TextType(Enum):
     LINK = "link"
     IMAGE = "image"
     
-    
-        
-        
+     
 class TextNode():
     def __init__(self, text: str, text_type: TextType, url: str = None) -> None:
         self.text: str = text
@@ -25,42 +22,3 @@ class TextNode():
     def __repr__(self) -> str:
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
     
-    
-def text_node_to_html_node(text_node: TextNode) -> LeafNode:
-    match text_node.text_type:
-        case TextType.TEXT:
-            return LeafNode(tag=None, value=text_node.text)
-        case TextType.BOLD:
-            return LeafNode(tag="b", value=text_node.text)
-        case TextType.ITALIC:
-            return LeafNode(tag="i", value=text_node.text)
-        case TextType.CODE:
-            return LeafNode(tag="code", value=text_node.text)
-        case TextType.LINK:
-            return LeafNode(tag="a", value=text_node.text, props={"href": text_node.url})
-        case TextType.IMAGE:
-            return LeafNode(tag="img", value="", props={"src": text_node.url, "alt": text_node.text})
-        case _:
-            raise ValueError(f"Trying to convert text node with invalid text type: {text_node.text_type}")
-        
-def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: TextType) -> list[TextNode]:
-    new_nodes = []
-    for node in old_nodes:
-        # only splitting TextType.TEXT nodes
-        if node.text_type != TextType.TEXT:
-            new_nodes.append(node)
-            continue
-        
-        split_text = node.text.split(delimiter)
-        
-        # if the lenght is not odd then a closing delimiter is missing
-        if len(split_text) % 2 != 1 and len(split_text) > 1:
-            raise Exception("closing delimiter missing")
-        
-        for index, item in enumerate(split_text):
-            if not item:
-                continue
-            # closed_delim open_delim closed_delim...
-            new_nodes.append(TextNode(item, TextType.TEXT if index % 2 == 0 else text_type))
-            
-    return new_nodes
