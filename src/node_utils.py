@@ -46,8 +46,61 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
 
 
 def extract_markdown_images(text: str) -> list[tuple[str, str]]:
-    return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+    #return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+    # using regex provided by boot.dev to match ![alt_text](url)
+    return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
 
 
 def extract_markdown_links(text: str) -> list[tuple[str, str]]:
-    return re.findall(r"(?<!!)\[(.*?)\]\((.*?)\)", text)
+    #return re.findall(r"(?<!!)\[(.*?)\]\((.*?)\)", text)
+    # using regex provided by boot.dev to match [anchor_text](url)
+    return re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+
+def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
+    
+    return split_nodes_imagelink(old_nodes, TextType.IMAGE)
+    
+
+def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
+
+    return split_nodes_imagelink(old_nodes, TextType.LINK)
+
+
+def split_nodes_imagelink(old_nodes: list[TextNode], text_type: TextType) -> list[TextNode]:
+    if text_type != TextType.IMAGE and text_type != TextType.LINK:
+        raise ValueError("split_nodes_imagelink only works with images and links")
+    
+    # decide the right extractor to use
+    extractor = extract_markdown_images if text_type == TextType.IMAGE else extract_markdown_links
+    
+    node_links = list(map(lambda node: extractor(node.text), old_nodes))
+    
+    if not node_links:
+        return old_nodes
+    
+    new_nodes: list[TextNode] = []
+    
+    #![alt_text](url) for images [anchor_text](url) for links
+    def delimiter(text: str, url: str) -> str:
+        return ('!' if text_type == TextType.IMAGE else "") + f"[{text}]({url})"
+    
+    for links_list, node in zip(node_links, old_nodes):
+        if not links_list:
+            new_nodes.append(node)
+            continue
+            
+        split_text = [node.text]
+        
+        for text, url in links_list:
+            split_text = split_text[-1].split(delimiter(text, url), 1)
+            
+            if split_text[0]:
+                new_nodes.append(TextNode(split_text[0], node.text_type))
+            new_nodes.append(TextNode(text, text_type, url))
+            
+        # append the last piece of text if it is not empty  
+        if split_text[-1]:
+            new_nodes.append(TextNode(split_text[-1], node.text_type))
+    
+    return new_nodes
