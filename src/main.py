@@ -1,5 +1,6 @@
 from textnode import *
 from htmlnode import *
+from node_utils import *
 
 
 def main():
