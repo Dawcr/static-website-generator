@@ -9,6 +9,7 @@ from node_utils import (
     split_nodes_link, 
     split_nodes_imagelink,
     text_to_textnodes,
+    markdown_to_html_node
 )
 
 from textnode import TextType, TextNode
@@ -22,11 +23,11 @@ class TestTextNodeToHTMLNode(unittest.TestCase):
         self.assertIsInstance(node1, LeafNode)
         self.assertEqual(
             node1.__repr__(),
-            "LeafNode(None, normal text, None)"
+            "LeafNode(None, normal text, None)",
         )
         self.assertEqual(
             node1.to_html(),
-            "normal text"
+            "normal text",
         )
         
         text_node2 = TextNode("bold text", TextType.BOLD)
@@ -34,11 +35,11 @@ class TestTextNodeToHTMLNode(unittest.TestCase):
         self.assertIsInstance(node2, LeafNode)
         self.assertEqual(
             node2.__repr__(),
-            "LeafNode(b, bold text, None)"
+            "LeafNode(b, bold text, None)",
         )
         self.assertEqual(
             node2.to_html(),
-            "<b>bold text</b>"
+            "<b>bold text</b>",
         )
         
         text_node3 = TextNode("italic text", TextType.ITALIC)
@@ -46,11 +47,11 @@ class TestTextNodeToHTMLNode(unittest.TestCase):
         self.assertIsInstance(node3, LeafNode)
         self.assertEqual(
             node3.__repr__(),
-            "LeafNode(i, italic text, None)"
+            "LeafNode(i, italic text, None)",
         )
         self.assertEqual(
             node3.to_html(),
-            "<i>italic text</i>"
+            "<i>italic text</i>",
         )
         
         text_node4 = TextNode("code", TextType.CODE)
@@ -58,11 +59,11 @@ class TestTextNodeToHTMLNode(unittest.TestCase):
         self.assertIsInstance(node4, LeafNode)
         self.assertEqual(
             node4.__repr__(),
-            "LeafNode(code, code, None)"
+            "LeafNode(code, code, None)",
         )
         self.assertEqual(
             node4.to_html(),
-            "<code>code</code>"
+            "<code>code</code>",
         )
         
         text_node5 = TextNode("click here", TextType.LINK, "https://www.google.com")
@@ -70,11 +71,11 @@ class TestTextNodeToHTMLNode(unittest.TestCase):
         self.assertIsInstance(node5, LeafNode)
         self.assertEqual(
             node5.__repr__(),
-            "LeafNode(a, click here, {'href': 'https://www.google.com'})"
+            "LeafNode(a, click here, {'href': 'https://www.google.com'})",
         )
         self.assertEqual(
             node5.to_html(),
-            '<a href="https://www.google.com">click here</a>'
+            '<a href="https://www.google.com">click here</a>',
         )
         
         text_node6 = TextNode("an image of a cat", TextType.IMAGE, "https://www.example.com/cat.jpeg")
@@ -82,11 +83,11 @@ class TestTextNodeToHTMLNode(unittest.TestCase):
         self.assertIsInstance(node6, LeafNode)
         self.assertEqual(
             node6.__repr__(),
-            "LeafNode(img, , {'src': 'https://www.example.com/cat.jpeg', 'alt': 'an image of a cat'})"
+            "LeafNode(img, , {'src': 'https://www.example.com/cat.jpeg', 'alt': 'an image of a cat'})",
         )
         self.assertEqual(
             node6.to_html(),
-            '<img src="https://www.example.com/cat.jpeg" alt="an image of a cat" />'
+            '<img src="https://www.example.com/cat.jpeg" alt="an image of a cat" />',
         )
         
         with self.assertRaisesRegex(ValueError, "Trying to convert text node with invalid text type"):
@@ -256,14 +257,14 @@ class TestExtractMarkdownLinks(unittest.TestCase):
         text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
         self.assertListEqual(
             extract_markdown_links(text),
-            [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
+            [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")],
         )
 
     def test_extract_on_images(self):
         text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
         self.assertListEqual(
             extract_markdown_links(text),
-            []
+            [],
         )
         
     # boot.dev test
@@ -454,6 +455,101 @@ class TestTextToTextnodes(unittest.TestCase):
                 TextNode("link", TextType.LINK, "https://boot.dev"),
             ],
             text_to_textnodes(text),
+        )
+
+
+class TestMarkdownToHTMLNode(unittest.TestCase):
+    def test_header(self):
+        text = markdown_to_html_node("## Header")
+        html = text.to_html()
+        self.assertEqual(
+            html,
+            "<div><h2>Header</h2></div>",
+        )
+        
+    # boot.dev tests
+    def test_paragraph(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p></div>",
+        )
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with *italic* text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    def test_lists(self):
+        md = """
+- This is a list
+- with items
+- and *more* items
+
+1. This is an `ordered` list
+2. with items
+3. and more items
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.maxDiff = None
+        self.assertEqual(
+            html,
+            "<div><ul><li>This is a list</li><li>with items</li><li>and <i>more</i> items</li></ul><ol><li>This is an <code>ordered</code> list</li><li>with items</li><li>and more items</li></ol></div>",
+        )
+
+    def test_headings(self):
+        md = """
+# this is an h1
+
+this is paragraph text
+
+## this is an h2
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><h1>this is an h1</h1><p>this is paragraph text</p><h2>this is an h2</h2></div>",
+        )
+
+    def test_blockquote(self):
+        md = """
+> This is a
+> blockquote block
+
+this is paragraph text
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><blockquote>This is a blockquote block</blockquote><p>this is paragraph text</p></div>",
         )
 
 
