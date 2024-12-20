@@ -10,7 +10,7 @@ from text_utils import *
 
 def main():
     reset_public()
-    generate_page("content/index.md", "template.html", "public/")
+    generate_pages_recursive("content/", "template.html", "public/")
 
 
 def reset_public() -> None:
@@ -41,7 +41,6 @@ def reset_public() -> None:
                     new_dir = os.path.join(public_path, pt.name)
                     os.mkdir(new_dir)
                     copy_contents(relative_path)
-                    continue
                 if pt.is_file():
                     print(f"copying {pt.name} to {os.path.relpath(public_path, start=root_dir)}")
                     shutil.copy(pt, public_path)
@@ -61,10 +60,6 @@ def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
     new_file_path = os.path.join(dest_path, file_name)
     
     if not os.path.exists(dest_path):
-        cwd = os.path.dirname(os.path.realpath(__file__))
-        root_dir = os.path.dirname(cwd)
-        additional_dirs = os.path.relpath(os.path.abspath(dest_path), root_dir)
-        
         def create_path(path: str) -> None:
             parent_dir = os.path.dirname(path)
             if not os.path.exists(parent_dir):
@@ -79,6 +74,27 @@ def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
         print(f"writing to {new_file_path}")
         file.write(full_html)
 
+
+def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str) -> None:
+    cwd = os.path.dirname(os.path.realpath(__file__))
+    root_dir = os.path.dirname(cwd)
+    public_dir_path = os.path.relpath(os.path.abspath(dest_dir_path), start=root_dir)
+    public_dir = os.path.join(root_dir, public_dir_path)
+    content_dir_path = os.path.relpath(os.path.abspath(dir_path_content), start=root_dir)
+    content_dir = os.path.join(root_dir, content_dir_path)
+    template_dir_path = os.path.relpath(os.path.abspath(template_path), start=root_dir)
+    template_dir = os.path.join(root_dir, template_dir_path)
+    
+    def generate(content_path: str) -> None:
+        with os.scandir(content_path) as it:
+            for pt in it:
+                if pt.is_file():
+                    dest_dir = os.path.join(public_dir, os.path.relpath(pt, start=content_dir))
+                    _, extension = os.path.splitext(pt)
+                    if extension == ".md":
+                        generate_page(pt, template_dir, dest_dir)
+                if pt.is_dir():
+                    generate(pt)
 
 
 if __name__ == "__main__":
