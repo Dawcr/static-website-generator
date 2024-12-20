@@ -6,6 +6,7 @@ from text_utils import (
     block_to_block_type,
 )
 
+
 class TestMarkdownToBlocks(unittest.TestCase):
     def test_example(self):
         text = """# This is a heading
@@ -95,7 +96,7 @@ class TestBlockToBlockType(unittest.TestCase):
         text = "#### This is a heading 4"
         self.assertEqual(
             block_to_block_type(text),
-            BlockType.HEADING4,
+            BlockType.HEADING,
         )
         
     def test_code(self):
@@ -160,7 +161,7 @@ class TestBlockToBlockType(unittest.TestCase):
     # boot.dev tests
     def test_block_to_block_types(self):
         block = "# heading"
-        self.assertEqual(block_to_block_type(block), BlockType.HEADING1)
+        self.assertEqual(block_to_block_type(block), BlockType.HEADING)
         block = "```\ncode\n```"
         self.assertEqual(block_to_block_type(block), BlockType.CODE)
         block = "> quote\n> more quote"

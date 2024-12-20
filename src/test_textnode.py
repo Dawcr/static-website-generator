@@ -23,7 +23,7 @@ class TestTextNode(unittest.TestCase):
         
         self.assertEqual(
             node.__repr__(),
-            "TextNode(This is a text node, bold, None)"
+            "TextNode(This is a text node, bold, None)",
         )
 
 

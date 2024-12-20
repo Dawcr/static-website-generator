@@ -23,19 +23,19 @@ class TestHTMLNode(unittest.TestCase):
         node = HTMLNode(tag="div", value="hello world")
         self.assertEqual(
             node.tag,
-            "div"
+            "div",
         )
         self.assertEqual(
             node.value,
-            "hello world"
+            "hello world",
         )
         self.assertEqual(
             node.children,
-            None
+            None,
         )
         self.assertEqual(
             node.props,
-            None
+            None,
         )
         
     def test_repr(self):
@@ -43,16 +43,16 @@ class TestHTMLNode(unittest.TestCase):
             "p",
             "Lorem ipsum",
             None,
-            {"class" : "placeholder"}
+            {"class" : "placeholder"},
         )
         self.assertEqual(
             node.__repr__(),
-            "HTMLNode(p, Lorem ipsum, children: None, {'class': 'placeholder'})"
+            "HTMLNode(p, Lorem ipsum, children: None, {'class': 'placeholder'})",
         )
         node2 = HTMLNode(
             tag="p",
             value="Lorem ipsum dolor",
-            props={"class" : "placeholder"}
+            props={"class" : "placeholder"},
         )
         self.assertNotEqual(node, node2)
         
@@ -60,13 +60,13 @@ class TestHTMLNode(unittest.TestCase):
         node = LeafNode("p", "This is a paragraph of text.")
         self.assertEqual(
             node.to_html(),
-            "<p>This is a paragraph of text.</p>"
+            "<p>This is a paragraph of text.</p>",
         )
         
         node2 = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
         self.assertEqual(
             node2.to_html(),
-            '<a href="https://www.google.com">Click me!</a>'
+            '<a href="https://www.google.com">Click me!</a>',
         )
         
         with self.assertRaisesRegex(ValueError, "Leaf node has no value"):
@@ -85,7 +85,7 @@ class TestHTMLNode(unittest.TestCase):
         node = LeafNode("p", "Hello world!")
         self.assertEqual(
             node.__repr__(),
-            "LeafNode(p, Hello world!, None)"
+            "LeafNode(p, Hello world!, None)",
         )
         
     def test_to_html_parentnode(self):
@@ -116,7 +116,7 @@ class TestHTMLNode(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Parent node has no children"):
             node3 = ParentNode(
                 "p",
-                None
+                None,
             )
             node3.to_html()
             
@@ -135,9 +135,9 @@ class TestHTMLNode(unittest.TestCase):
                             "p",
                             [
                                 LeafNode("i", "italic text"),
-                            ]
+                            ],
                         ),
-                    ]
+                    ],
                 )
             ],
         )
@@ -163,9 +163,9 @@ class TestHTMLNode(unittest.TestCase):
                                 "p",
                                 [
                                     LeafNode(None, None),
-                                ]
+                                ],
                             ),
-                        ]
+                        ],
                     )
                 ],
             )

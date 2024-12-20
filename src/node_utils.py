@@ -106,6 +106,7 @@ def split_nodes_imagelink(old_nodes: list[TextNode], text_type: TextType) -> lis
     
     return new_nodes
 
+
 def text_to_textnodes(text: str) -> list[TextNode]:
     node_delimiters = {
         TextType.BOLD : "**",
@@ -123,17 +124,18 @@ def text_to_textnodes(text: str) -> list[TextNode]:
 def markdown_to_html_node(markdown: str) -> ParentNode:
     blocks_tuple = list(map(lambda block: (block_to_block_type(block), block), markdown_to_blocks(markdown)))
     
-    children: list[list[HTMLNode]] = []
+    children: list[ParentNode] = []
     for item in blocks_tuple:
         children.append(block_to_html_node(*item))
     
     return ParentNode("div", children) 
 
+
 def block_to_html_node(block_type, block):
-    if block_type in [BlockType.HEADING1, BlockType.HEADING2, BlockType.HEADING3, BlockType.HEADING4, BlockType.HEADING5, BlockType.HEADING6]:
-        return header_to_htmlnode(block_type, block)
     if block_type in [BlockType.ORDERED_LIST, BlockType.UNORDERED_LIST]:
         return list_to_htmlnode(block_type, block)
+    if block_type == BlockType.HEADING:
+        return header_to_htmlnode(block)
     if block_type == BlockType.CODE:
         return code_to_htmlnode(block)
     if block_type == BlockType.QUOTE:
@@ -141,31 +143,31 @@ def block_to_html_node(block_type, block):
     if block_type == BlockType.PARAGRAPH:
         return paragraph_to_htmlnode(block)
     raise ValueError("Invalid block type")
+  
     
 def text_to_children(text: str) -> list[LeafNode]:
     return list(map(text_node_to_html_node, text_to_textnodes(text)))
 
     
-def header_to_htmlnode(type: BlockType, block: str) -> ParentNode:
+def header_to_htmlnode(block: str) -> ParentNode:
     # header block should start with 1 to 6 # followed by space and then header text
     if not block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
         raise ValueError("Incorrect header format")
     
-    # remove the preceding 1-6 # followed by space by splitting at space and returning the second half
-    text = block.split(maxsplit=1)[1]
-    # Blocktype.HEADING<n> is set to value "heading <n>", taking advantage of it and splitting at space to return <n>, could also use type.value[8], but trying to avoid magic numbers
-    header_number = f"h{type.value.split()[1]}"
+    # split the preceding 1-6 # and the header text
+    hash, text = block.split(maxsplit=1)
+    header = f"h{len(hash)}"
     
-    return ParentNode(header_number, text_to_children(text))
+    return ParentNode(header, text_to_children(text))
 
 
 def code_to_htmlnode(block: str) -> ParentNode:
     # code block should start and end with 3 backticks
-    if not block.startswith("```") or not block.endswith("```"):
+    if not block.startswith("```") or not block.endswith("```") or len(block) < 6:
         raise ValueError("Incorrect code block format")
     
     # remove the starting and ending ```
-    text = block[4:-3]
+    text = block[4:-3] # list slicing should return an empty string if block is just 6 backticks
     return ParentNode("pre", [ParentNode("code", text_to_children(text))])
     
     
@@ -195,7 +197,7 @@ def quotes_to_htmlnode(block: str) -> ParentNode:
         # every line in a quote block starts with a >
         if not item.startswith('>'):
             raise ValueError("Incorrect quote block format")
-        lines.append(item[1:].strip())
+        lines.append(item[1:].strip()) # stripping whitespace to comply with boot.dev tests
     text = " ".join(lines)
     
     return ParentNode("blockquote", text_to_children(text))
@@ -204,5 +206,5 @@ def quotes_to_htmlnode(block: str) -> ParentNode:
 def paragraph_to_htmlnode(block: str) -> ParentNode:
     lines = block.split('\n')
     text = " ".join(lines)
-    return ParentNode("p", list(map(text_node_to_html_node, text_to_textnodes(text))))
+    return ParentNode("p", text_to_children(text))
 

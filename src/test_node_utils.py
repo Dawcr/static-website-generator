@@ -11,7 +11,6 @@ from node_utils import (
     text_to_textnodes,
     markdown_to_html_node
 )
-
 from textnode import TextType, TextNode
 from htmlnode import LeafNode
 
@@ -460,11 +459,18 @@ class TestTextToTextnodes(unittest.TestCase):
 
 class TestMarkdownToHTMLNode(unittest.TestCase):
     def test_header(self):
-        text = markdown_to_html_node("## Header")
-        html = text.to_html()
+        node = markdown_to_html_node("## Header")
+        html = node.to_html()
         self.assertEqual(
             html,
             "<div><h2>Header</h2></div>",
+        )
+        
+    def test_header_with_link(self):
+        node = markdown_to_html_node("#### This is a header with a [link](https://example.com) inside of it")
+        self.assertEqual(
+            node.to_html(),
+            '<div><h4>This is a header with a <a href="https://example.com">link</a> inside of it</h4></div>',
         )
         
     # boot.dev tests

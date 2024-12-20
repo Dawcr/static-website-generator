@@ -7,12 +7,8 @@ class BlockType(Enum):
     QUOTE = "quote"
     ORDERED_LIST = "ordered_list"
     UNORDERED_LIST = "unordered_list"
-    HEADING1 = "heading 1"
-    HEADING2 = "heading 2"
-    HEADING3 = "heading 3"
-    HEADING4 = "heading 4"
-    HEADING5 = "heading 5"
-    HEADING6 = "heading 6"
+    HEADING = "heading"
+
 
 def markdown_to_blocks(markdown: str) -> list[str]:
     lines = markdown.split('\n')
@@ -39,8 +35,7 @@ def block_to_block_type(block: str) -> BlockType:
     
     # Headings start with 1-6 # characters, followed by a space and then the heading text.
     if block.startswith(("#", "##", "###", "####", "#####", "######", "#######")):
-        start = block.split(maxsplit=1)[0]
-        return BlockType(f"heading {len(start)}")
+        return BlockType.HEADING
     
     # Code blocks must start with 3 backticks and end with 3 backticks.
     if len(lines) > 1 and block.startswith("```") and block.endswith("```"):
@@ -70,5 +65,4 @@ def block_to_block_type(block: str) -> BlockType:
     
     # If none of the above conditions are met, the block is a normal paragraph.
     return BlockType.PARAGRAPH
-
 
