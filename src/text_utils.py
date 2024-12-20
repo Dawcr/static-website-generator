@@ -66,3 +66,16 @@ def block_to_block_type(block: str) -> BlockType:
     # If none of the above conditions are met, the block is a normal paragraph.
     return BlockType.PARAGRAPH
 
+
+def extract_title(markdown: str) -> str:
+    lines = markdown.split('\n')
+    for line in lines:
+        if line.strip().startswith("# "):
+            return line.strip()[2:].strip()
+    raise ValueError("Missing h1 header")
+
+
+def get_file_content(path: str) -> str:
+    with open(path) as file:
+        return file.read() 
+

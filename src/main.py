@@ -1,18 +1,21 @@
 import os
 import shutil
+import sys
 
 from textnode import *
 from htmlnode import *
 from node_utils import *
+from text_utils import *
 
 
 def main():
     reset_public()
+    generate_page("content/index.md", "template.html", "public/")
 
 
 def reset_public() -> None:
     cwd = os.path.dirname(os.path.realpath(__file__))
-    root_dir, _ = os.path.split(cwd)
+    root_dir = os.path.dirname(cwd)
     public_dir = os.path.join(root_dir, "public")
     static_dir = os.path.join(root_dir, "static")
     
@@ -44,6 +47,38 @@ def reset_public() -> None:
                     shutil.copy(pt, public_path)
                 
     copy_contents()
+
+
+def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    markdown = get_file_content(from_path)
+    template = get_file_content(template_path)
+    html = markdown_to_html_node(markdown).to_html()
+    title = extract_title(markdown)
+    full_html = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+    file_name, _ = os.path.splitext(os.path.basename(from_path))
+    file_name += ".html"
+    new_file_path = os.path.join(dest_path, file_name)
+    
+    if not os.path.exists(dest_path):
+        cwd = os.path.dirname(os.path.realpath(__file__))
+        root_dir = os.path.dirname(cwd)
+        additional_dirs = os.path.relpath(os.path.abspath(dest_path), root_dir)
+        
+        def create_path(path: str) -> None:
+            parent_dir = os.path.dirname(path)
+            if not os.path.exists(parent_dir):
+                create_path(parent_dir)
+                
+            print(f"Creating {path}")
+            os.mkdir(path)
+            
+        create_path(dest_path)
+        
+    with open(new_file_path, "w+") as file:
+        print(f"writing to {new_file_path}")
+        file.write(full_html)
+
 
 
 if __name__ == "__main__":

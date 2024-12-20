@@ -4,6 +4,7 @@ from text_utils import BlockType
 from text_utils import (
     markdown_to_blocks,
     block_to_block_type,
+    extract_title,
 )
 
 
@@ -172,6 +173,20 @@ class TestBlockToBlockType(unittest.TestCase):
         self.assertEqual(block_to_block_type(block), BlockType.ORDERED_LIST)
         block = "paragraph"
         self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+        
+        
+class TestExtractTitle(unittest.TestCase):
+    def test_example(self):
+        text = "# Hello"
+        self.assertEqual(
+            extract_title(text),
+            "Hello",
+        )
+        
+    def test_exception(self):
+        text = "### Hello"
+        with self.assertRaisesRegex(ValueError, "Missing h1 header"):
+            extract_title(text)
         
         
 if __name__ == "__main__":
