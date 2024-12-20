@@ -1,11 +1,11 @@
 import os
 import shutil
-import sys
 
-from textnode import *
-from htmlnode import *
-from node_utils import *
-from text_utils import *
+from text_utils import (
+    get_file_content,
+    extract_title
+)
+from node_utils import markdown_to_html_node
 
 
 def main():
@@ -48,8 +48,8 @@ def reset_public() -> None:
     copy_contents()
 
 
-def generate_page(from_path: str, template_path: str, dest_path: str) -> None:
-    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+def generate_page(from_path: os.DirEntry, template_path: str, dest_path: str) -> None:
+    print(f"Generating page from {from_path.name} to {dest_path} using {template_path}")
     markdown = get_file_content(from_path)
     template = get_file_content(template_path)
     html = markdown_to_html_node(markdown).to_html()
@@ -89,12 +89,15 @@ def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir
         with os.scandir(content_path) as it:
             for pt in it:
                 if pt.is_file():
-                    dest_dir = os.path.join(public_dir, os.path.relpath(pt, start=content_dir))
+                    dest_dir = os.path.join(public_dir, os.path.relpath(os.path.dirname(pt.path), start=content_dir))
                     _, extension = os.path.splitext(pt)
+                    print(extension)
                     if extension == ".md":
                         generate_page(pt, template_dir, dest_dir)
                 if pt.is_dir():
                     generate(pt)
+                    
+    generate(content_dir)
 
 
 if __name__ == "__main__":
