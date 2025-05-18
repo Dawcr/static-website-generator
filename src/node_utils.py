@@ -109,17 +109,20 @@ def split_nodes_imagelink(old_nodes: list[TextNode], text_type: TextType) -> lis
 
 def text_to_textnodes(text: str) -> list[TextNode]:
     node_delimiters = {
-        TextType.BOLD : "**",
-        TextType.ITALIC : "*",
-        TextType.ITALIC : "_",
-        TextType.CODE : "`",
+        "**" : TextType.BOLD,
+        "__" : TextType.BOLD,
+        "*" : TextType.ITALIC,
+        "_" : TextType.ITALIC,
+        "`" : TextType.CODE,
     }
     nodes = [TextNode(text, TextType.TEXT)]
     
-    for type, delimiter in node_delimiters.items():
+    nodes = split_nodes_image(split_nodes_link(nodes))
+    
+    for delimiter, type in node_delimiters.items():
         nodes = split_nodes_delimiter(nodes, delimiter, type)
         
-    return split_nodes_image(split_nodes_link(nodes))
+    return nodes
 
 
 def markdown_to_html_node(markdown: str) -> ParentNode:
