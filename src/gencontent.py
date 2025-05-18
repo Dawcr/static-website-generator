@@ -11,14 +11,15 @@ from node_utils import markdown_to_html_node
 def reset_public() -> None:
     cwd = os.path.dirname(os.path.realpath(__file__))
     root_dir = os.path.dirname(cwd)
-    public_dir = os.path.join(root_dir, "public")
-    static_dir = os.path.join(root_dir, "static")
+    
+    public_dir = os.path.join(root_dir, "docs")
+    static_dir = os.path.join(root_dir, "static") 
     
     if os.path.exists(public_dir):
         print(f"deleting {public_dir}")
         shutil.rmtree(public_dir)
         
-    os.mkdir(public_dir)
+    os.makedirs(public_dir)
         
     if not os.path.exists(static_dir):
         print(f"{static_dir} missing, nothing to copy")
@@ -43,13 +44,13 @@ def reset_public() -> None:
     copy_contents()
 
 
-def generate_page(from_path: os.DirEntry, template_path: str, dest_path: str) -> None:
+def generate_page(from_path: os.DirEntry, template_path: str, dest_path: str, basepath: str = "/") -> None:
     print(f"Generating page from {from_path.name} to {dest_path} using {template_path}")
     markdown = get_file_content(from_path)
     template = get_file_content(template_path)
     html = markdown_to_html_node(markdown).to_html()
     title = extract_title(markdown)
-    full_html = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+    full_html = template.replace("{{ Title }}", title).replace("{{ Content }}", html).replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
     file_name, _ = os.path.splitext(os.path.basename(from_path))
     file_name += ".html"
     new_file_path = os.path.join(dest_path, file_name)
@@ -70,9 +71,10 @@ def generate_page(from_path: os.DirEntry, template_path: str, dest_path: str) ->
         file.write(full_html)
 
 
-def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str) -> None:
+def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str, basepath: str = None) -> None:
     cwd = os.path.dirname(os.path.realpath(__file__))
     root_dir = os.path.dirname(cwd)
+    
     public_dir_path = os.path.relpath(os.path.abspath(dest_dir_path), start=root_dir)
     public_dir = os.path.join(root_dir, public_dir_path)
     content_dir_path = os.path.relpath(os.path.abspath(dir_path_content), start=root_dir)
@@ -88,7 +90,7 @@ def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir
                     _, extension = os.path.splitext(pt)
                     print(extension)
                     if extension == ".md":
-                        generate_page(pt, template_dir, dest_dir)
+                        generate_page(pt, template_dir, dest_dir, basepath)
                 if pt.is_dir():
                     generate(pt)
                     
