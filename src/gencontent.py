@@ -44,7 +44,7 @@ def reset_public() -> None:
     copy_contents()
 
 
-def generate_page(from_path: os.DirEntry, template_path: str, dest_path: str, basepath: str = "/") -> None:
+def generate_page(from_path: os.DirEntry, template_path: str, dest_path: str, basepath: str) -> None:
     print(f"Generating page from {from_path.name} to {dest_path} using {template_path}")
     markdown = get_file_content(from_path)
     template = get_file_content(template_path)
@@ -71,7 +71,7 @@ def generate_page(from_path: os.DirEntry, template_path: str, dest_path: str, ba
         file.write(full_html)
 
 
-def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str, basepath: str = None) -> None:
+def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str, basepath: str) -> None:
     cwd = os.path.dirname(os.path.realpath(__file__))
     root_dir = os.path.dirname(cwd)
     
